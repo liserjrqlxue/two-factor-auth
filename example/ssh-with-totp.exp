@@ -6,8 +6,8 @@ set password [ exec cat password.txt ]
 #puts $password
 set uid wangyaoshen
 set host 10.225.5.31
-puts try to ssh $uid@$host
-spawn ssh $uid@host
+puts "try to ssh $uid@$host"
+spawn ssh $uid@$host
 expect "Password:"
 send "$password\n"
 expect "Verification code:"
