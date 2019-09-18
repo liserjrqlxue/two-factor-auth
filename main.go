@@ -4,7 +4,10 @@ import (
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base32"
+	"flag"
 	"fmt"
+	simple_util "github.com/liserjrqlxue/simple-util"
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -53,28 +56,43 @@ func oneTimePassword(key []byte, value []byte) uint32 {
 	return pwd
 }
 
+var (
+	secret = flag.String(
+		"secret",
+		"",
+		"secret string",
+	)
+	remainLimit = flag.Int64(
+		"remainLimit",
+		5,
+		"remain enough seconds for use the result code",
+	)
+)
+
 // all []byte in this program are treated as Big Endian
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "must specify key to use")
+	flag.Parse()
+	if *secret == "" {
+		flag.Usage()
+		log.Println("-secret is required")
 		os.Exit(1)
 	}
-
-	input := os.Args[1]
 
 	// decode the key from the first argument
-	inputNoSpaces := strings.Replace(input, " ", "", -1)
+	inputNoSpaces := strings.Replace(*secret, " ", "", -1)
 	inputNoSpacesUpper := strings.ToUpper(inputNoSpaces)
 	key, err := base32.StdEncoding.DecodeString(inputNoSpacesUpper)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
-	}
+	simple_util.CheckErr(err)
 
 	// generate a one-time password using the time at 30-second intervals
 	epochSeconds := time.Now().Unix()
+	secondsRemaining := 30 - (epochSeconds % 30)
+	for secondsRemaining < *remainLimit {
+		time.Sleep(time.Second)
+		epochSeconds = time.Now().Unix()
+		secondsRemaining = 30 - (epochSeconds % 30)
+	}
 	pwd := oneTimePassword(key, toBytes(epochSeconds/30))
 
-	secondsRemaining := 30 - (epochSeconds % 30)
 	fmt.Printf("%06d (%d second(s) remaining)\n", pwd, secondsRemaining)
 }

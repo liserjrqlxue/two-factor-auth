@@ -3,7 +3,7 @@ Simple CLI app that generates tokens compatible with Google Authenticator. I imp
 Example output:
 
 ```sh
-$ go run main.go "<your key>"
+$ go run main.go -secret "<your key>"
 934523 (17 second(s) remaining)
 ```
 
