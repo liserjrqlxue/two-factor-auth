@@ -12,7 +12,7 @@ spawn ssh $uid@$host
 expect "Password:"
 send "$password\n"
 expect "Verification code:"
-set vcode [ exec two-factor-auth -secret $secret ]
+set vcode [ exec two-factor-auth -secret $secret -remainLimit 2 ]
 set code [ exec echo $vcode | cut -d " " -f 1 ]
 puts $vcode
 send "$code\n"
