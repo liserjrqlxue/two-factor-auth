@@ -1,5 +1,6 @@
 #!/usr/bin/env expect
 
+set timeout -1
 set secret [ exec cat secret.txt ]
 #puts $secret
 set password [ exec cat password.txt ]
